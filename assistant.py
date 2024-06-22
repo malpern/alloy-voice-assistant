@@ -20,8 +20,21 @@ load_dotenv()
 
 class WebcamStream:
     def __init__(self):
-        self.stream = VideoCapture(index=0)
-        _, self.frame = self.stream.read()
+        # Try different indices to find the built-in webcam
+        for i in range(10):  # Try up to 10 camera indices
+            self.stream = VideoCapture(i)
+            if self.stream.isOpened():
+                ret, frame = self.stream.read()
+                if ret:
+                    print(f"Using camera index: {i}")
+                    self.frame = frame
+                    break
+                else:
+                    self.stream.release()
+        
+        if not hasattr(self, 'frame'):
+            raise RuntimeError("Could not initialize webcam")
+        
         self.running = False
         self.lock = Lock()
 
